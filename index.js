@@ -51,9 +51,11 @@ async function run() {
     })
 
     // booking related
-    app.post('bookings',async(req,res)=>{
+    app.post('/bookings',async(req,res)=>{
       const booking=req.body;
       console.log(booking)
+      const result=await bookingCollection.insertOne(booking)
+      res.send(result)
     })
    
     await client.db("admin").command({ ping: 1 });
