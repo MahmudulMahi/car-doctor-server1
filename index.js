@@ -53,6 +53,7 @@ async function run() {
     // booking related
     app.post('bookings',async(req,res)=>{
       const booking=req.body;
+      console.log(booking)
     })
    
     await client.db("admin").command({ ping: 1 });
