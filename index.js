@@ -58,8 +58,7 @@ async function run() {
       if(req.query?.email){
         query={email:req.query.email}
       }
-      const cursor=serviceCollection.find()
-      const result=await cursor.toArray()
+      const result= await bookingCollection.find().toArray()
       res.send(result)
     })
     app.post('/bookings',async(req,res)=>{
