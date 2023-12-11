@@ -29,6 +29,30 @@ const client = new MongoClient(uri, {
   }
 });
 
+// nijer middlewares
+const logger=async(req,res,next)=>{
+  console.log('called',req.host,req.originalUrl)
+  next()
+}
+
+const verifyToken=async(req,res,next)=>{
+  const token=req.cookies?.token;
+  console.log('value',token)
+  if(!token){
+    return res.status(401).send({message:'not authorized'})
+  }
+  jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
+    if(err){
+      console.log(err)
+      return res.status(401).send({message:'unauthorized'})
+    }
+    console.log('decoded',decoded)
+    req.user=decoded
+    next()
+  })
+ 
+}
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -37,7 +61,7 @@ async function run() {
     const serviceCollection=client.db('carDoctor').collection('services')
     const bookingCollection=client.db('carDoctor').collection('bookings')
   // auth related api
-  app.post('/jwt',async(req,res)=>{
+  app.post('/jwt', logger,async(req,res)=>{
     const user=req.body;
     console.log(user)
     const token=jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'})
@@ -51,7 +75,7 @@ async function run() {
   })
 
     // services related
-    app.get('/services',async(req,res)=>{
+    app.get('/services', logger,async(req,res)=>{
       const cursor=serviceCollection.find()
       const result=await cursor.toArray()
       res.send(result)
@@ -71,9 +95,10 @@ async function run() {
 
     // booking related
 
-    app.get('/bookings',async(req,res)=>{
+    app.get('/bookings',logger , verifyToken,async(req,res)=>{
       console.log(req.query.email)
-      console.log('tok tok token',req.cookies.token)
+      // console.log('tok tok token',req.cookies.token)
+      console.log('token',req.user)
       let query={}
       if(req.query?.email){
         query={email:req.query.email}
