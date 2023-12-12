@@ -99,6 +99,9 @@ async function run() {
       console.log(req.query.email)
       // console.log('tok tok token',req.cookies.token)
       console.log('token',req.user)
+      if(req.query.email !==req.user.email){
+        return res.status(403).send({message:'forbidden access'})
+      }
       let query={}
       if(req.query?.email){
         query={email:req.query.email}
@@ -145,10 +148,4 @@ run().catch(console.dir);
 
 
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-});
